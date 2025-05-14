@@ -1,0 +1,26 @@
+# Node
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Environnement
+.env
+.env.*
+!.env.example
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Divers
+.DS_Store
