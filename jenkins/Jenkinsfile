@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
+        DOCKER_HUB_CREDS = credentials('dockerhub-credentials')
         APP_NAME = 'todo-app'
         IMAGE_NAME = "${DOCKER_HUB_CREDS_USR}/${APP_NAME}"
         IMAGE_TAG = "${env.BUILD_NUMBER}"
@@ -45,7 +45,7 @@ pipeline {
         
         stage('Deploy to Kubernetes') {
             environment {
-                KUBECONFIG = credentials('kubeconfig')
+                KUBECONFIG = credentials('kubernetes-config')
             }
             steps {
                 sh 'mkdir -p ~/.kube'
