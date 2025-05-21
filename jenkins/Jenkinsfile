@@ -77,21 +77,16 @@ pipeline {
                 echo "=== Deployed Resources ==="
                 kubectl get pods,svc,ingress
                 '''
+
+                sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest || true"
+                sh 'rm -f ~/.kube/config || true'
             }
         }
     }
     
     post {
         always {
-            node {
-                echo "Nettoyage des ressources..."
-                script {
-                    withEnv(["IMAGE_NAME=${env.IMAGE_NAME}", "IMAGE_TAG=${env.IMAGE_TAG}"]) {
-                        sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest || true"
-                        sh 'rm -f ~/.kube/config || true'
-                    }
-                }
-            }
+            echo "Nettoyage terminé"
         }
         success {
             echo "===== Deployment completed successfully ====="
