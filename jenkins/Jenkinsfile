@@ -88,10 +88,15 @@ pipeline {
     
     post {
         always {
-            // Nettoyage des images locales
-            sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest || true"
-            // Supprimer le fichier kubeconfig
-            sh 'rm -f ~/.kube/config || true'
+            script {
+                // Utiliser try-catch pour éviter l'erreur si IMAGE_NAME n'est pas défini
+                try {
+                    sh "docker rmi ${env.IMAGE_NAME}:${env.IMAGE_TAG} ${env.IMAGE_NAME}:latest || true"
+                } catch (Exception e) {
+                    echo "Impossible de nettoyer les images Docker: ${e.message}"
+                }
+                sh 'rm -f ~/.kube/config || true'
+            }
         }
         success {
             echo "===== Deployment completed successfully ====="
