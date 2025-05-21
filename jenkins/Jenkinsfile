@@ -88,13 +88,10 @@ pipeline {
     
     post {
         always {
-            node {
-                script {
-                    try {
-                        sh "docker rmi ${env.IMAGE_NAME}:${env.IMAGE_TAG} ${env.IMAGE_NAME}:latest || true"
-                    } catch (Exception e) {
-                        echo "Impossible de nettoyer les images Docker: ${e.message}"
-                    }
+            echo "Nettoyage des ressources..."
+            script {
+                withEnv(["IMAGE_NAME=${env.IMAGE_NAME}", "IMAGE_TAG=${env.IMAGE_TAG}"]) {
+                    sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest || true"
                     sh 'rm -f ~/.kube/config || true'
                 }
             }
