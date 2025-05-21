@@ -1,0 +1,209 @@
+/* Variables CSS */
+:root {
+    --primary-color: #4a6da7;
+    --secondary-color: #5c88c5;
+    --bg-color: #f8f9fa;
+    --text-color: #333;
+    --border-color: #dee2e6;
+    --shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    --radius: 0.375rem;
+}
+
+/* Base */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
+    background-color: var(--bg-color);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
+header {
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+}
+
+h1, h2 {
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+/* Formulaires */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 1rem;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 1rem;
+    text-align: center;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--secondary-color);
+}
+
+/* Liste des tâches */
+.tasks-container {
+    margin-top: 2rem;
+}
+
+.filter-container {
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.filter-container label {
+    margin-right: 0.5rem;
+    margin-bottom: 0;
+}
+
+.filter-container select {
+    width: auto;
+}
+
+.tasks-list {
+    list-style: none;
+}
+
+.task-item {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background-color: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.task-item h3 {
+    margin-bottom: 0.5rem;
+}
+
+.task-item p {
+    margin-bottom: 0.75rem;
+}
+
+.task-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.task-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.btn-edit, .btn-delete {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.btn-edit {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+
+.status-todo {
+    color: #dc3545;
+}
+
+.status-in_progress {
+    color: #ffc107;
+}
+
+.status-done {
+    color: #28a745;
+}
+
+.priority-low {
+    color: #6c757d;
+}
+
+.priority-medium {
+    color: #fd7e14;
+}
+
+.priority-high {
+    color: #dc3545;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 2rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    max-width: 600px;
+    width: 90%;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: black;
+}
