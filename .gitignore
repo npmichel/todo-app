@@ -24,3 +24,7 @@ logs/
 
 # Divers
 .DS_Store
+
+
+
+scripts/deploy-kubernetes.sh

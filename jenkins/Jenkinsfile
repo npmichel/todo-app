@@ -1,0 +1,103 @@
+pipeline {
+    agent any
+    
+    environment {
+        DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
+        DOCKER_HUB_USERNAME = "${env.DOCKER_HUB_CREDS_USR}"
+        APP_NAME = 'todo-app'
+        IMAGE_NAME = "${DOCKER_HUB_USERNAME}/${APP_NAME}"
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+    }
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+        
+        stage('Run Tests') {
+            steps {
+                sh 'npm test'
+            }
+        }
+        
+        stage('Build Docker Image') {
+            steps {
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                sh "docker tag ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest"
+            }
+        }
+        
+        stage('Push to Docker Hub') {
+            steps {
+                sh "echo ${DOCKER_HUB_CREDS_PSW} | docker login -u ${DOCKER_HUB_CREDS_USR} --password-stdin"
+                sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                sh "docker push ${IMAGE_NAME}:latest"
+                sh "docker logout"
+            }
+        }
+        
+        stage('Deploy to Kubernetes') {
+            environment {
+                KUBECONFIG = credentials('kubeconfig')
+            }
+            steps {
+                sh 'mkdir -p ~/.kube'
+                sh 'cat $KUBECONFIG > ~/.kube/config'
+                
+                // Mise à jour des variables d'environnement dans les fichiers YAML
+                sh """
+                sed -i 's/\${DOCKER_HUB_USERNAME}/${DOCKER_HUB_USERNAME}/g' kubernetes/app/deployment.yaml
+                sed -i 's/\${IMAGE_TAG}/${IMAGE_TAG}/g' kubernetes/app/deployment.yaml
+                """
+                
+                // Application des fichiers Kubernetes
+                sh '''
+                kubectl apply -f kubernetes/secrets/db-credentials.yaml
+                kubectl apply -f kubernetes/db/pv.yaml
+                kubectl apply -f kubernetes/db/pvc.yaml
+                kubectl apply -f kubernetes/db/deployment.yaml
+                kubectl apply -f kubernetes/db/service.yaml
+                kubectl apply -f kubernetes/app/configmap.yaml
+                kubectl apply -f kubernetes/app/deployment.yaml
+                kubectl apply -f kubernetes/app/service.yaml
+                kubectl apply -f kubernetes/app/ingress.yaml
+                '''
+                
+                // Attendre que les pods soient prêts
+                sh '''
+                kubectl rollout status deployment/todo-app
+                kubectl rollout status deployment/todo-db
+                '''
+                
+                // Afficher les ressources déployées
+                sh '''
+                echo "=== Deployed Resources ==="
+                kubectl get pods,svc,ingress
+                '''
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Nettoyage des images locales
+            sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest || true"
+            // Supprimer le fichier kubeconfig
+            sh 'rm -f ~/.kube/config || true'
+        }
+        success {
+            echo "===== Deployment completed successfully ====="
+        }
+        failure {
+            echo "===== Deployment failed ====="
+        }
+    }
+}

@@ -1,0 +1,44 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  # Utilisation d'Ubuntu 22.04 LTS (Jammy Jellyfish)
+  config.vm.box = "ubuntu/jammy64"
+  
+  # Configuration commune
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "4096"
+    vb.cpus = 2
+  end
+
+  # VM Jenkins
+  config.vm.define "jenkins" do |jenkins|
+    jenkins.vm.hostname = "jenkins"
+    jenkins.vm.network "private_network", ip: "192.168.56.10"
+    jenkins.vm.network "forwarded_port", guest: 8080, host: 8080  # Jenkins UI
+    jenkins.vm.network "forwarded_port", guest: 80, host: 8081    # NGINX
+
+    jenkins.vm.provision "shell", path: "scripts/install_common.sh"
+    jenkins.vm.provision "shell", path: "scripts/install_jenkins.sh"
+  end
+
+  # VM Kubernetes
+  config.vm.define "kubernetes" do |k8s|
+    k8s.vm.hostname = "kubernetes"
+    k8s.vm.network "private_network", ip: "192.168.56.11"
+    k8s.vm.network "forwarded_port", guest: 80, host: 8082      # NGINX
+    k8s.vm.network "forwarded_port", guest: 6443, host: 6443    # K8s API
+    k8s.vm.network "forwarded_port", guest: 30000, host: 30000  # NodePort début
+    k8s.vm.network "forwarded_port", guest: 30001, host: 30001  # NodePort pour app
+    k8s.vm.network "forwarded_port", guest: 30002, host: 30002  # NodePort pour DB
+
+    # Ressources supplémentaires pour Kubernetes
+    k8s.vm.provider "virtualbox" do |vb|
+      vb.memory = "6144"  # 6GB RAM
+      vb.cpus = 2
+    end
+
+    k8s.vm.provision "shell", path: "scripts/install_common.sh"
+    k8s.vm.provision "shell", path: "scripts/install_kubernetes.sh"
+  end
+end
