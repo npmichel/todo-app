@@ -3,9 +3,8 @@ pipeline {
     
     environment {
         DOCKER_HUB_CREDS = credentials('docker-hub-credentials')
-        DOCKER_HUB_USERNAME = "${env.DOCKER_HUB_CREDS_USR}"
         APP_NAME = 'todo-app'
-        IMAGE_NAME = "${DOCKER_HUB_USERNAME}/${APP_NAME}"
+        IMAGE_NAME = "${DOCKER_HUB_CREDS_USR}/${APP_NAME}"
         IMAGE_TAG = "${env.BUILD_NUMBER}"
     }
     
@@ -52,13 +51,11 @@ pipeline {
                 sh 'mkdir -p ~/.kube'
                 sh 'cat $KUBECONFIG > ~/.kube/config'
                 
-                // Mise à jour des variables d'environnement dans les fichiers YAML
                 sh """
-                sed -i 's/\${DOCKER_HUB_USERNAME}/${DOCKER_HUB_USERNAME}/g' kubernetes/app/deployment.yaml
+                sed -i 's/\${DOCKER_HUB_USERNAME}/${DOCKER_HUB_CREDS_USR}/g' kubernetes/app/deployment.yaml
                 sed -i 's/\${IMAGE_TAG}/${IMAGE_TAG}/g' kubernetes/app/deployment.yaml
                 """
                 
-                // Application des fichiers Kubernetes
                 sh '''
                 kubectl apply -f kubernetes/secrets/db-credentials.yaml
                 kubectl apply -f kubernetes/db/pv.yaml
@@ -71,13 +68,11 @@ pipeline {
                 kubectl apply -f kubernetes/app/ingress.yaml
                 '''
                 
-                // Attendre que les pods soient prêts
                 sh '''
                 kubectl rollout status deployment/todo-app
                 kubectl rollout status deployment/todo-db
                 '''
                 
-                // Afficher les ressources déployées
                 sh '''
                 echo "=== Deployed Resources ==="
                 kubectl get pods,svc,ingress
@@ -88,11 +83,13 @@ pipeline {
     
     post {
         always {
-            echo "Nettoyage des ressources..."
-            script {
-                withEnv(["IMAGE_NAME=${env.IMAGE_NAME}", "IMAGE_TAG=${env.IMAGE_TAG}"]) {
-                    sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest || true"
-                    sh 'rm -f ~/.kube/config || true'
+            node {
+                echo "Nettoyage des ressources..."
+                script {
+                    withEnv(["IMAGE_NAME=${env.IMAGE_NAME}", "IMAGE_TAG=${env.IMAGE_TAG}"]) {
+                        sh "docker rmi ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest || true"
+                        sh 'rm -f ~/.kube/config || true'
+                    }
                 }
             }
         }
