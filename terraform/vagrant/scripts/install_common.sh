@@ -45,6 +45,12 @@ apt-get install -y nginx
 systemctl enable nginx
 systemctl start nginx
 
+# Installation de Node.js et npm
+echo "=== Installation de Node.js et npm ==="
+curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+apt-get install -y nodejs
+
+
 # Configuration du fichier de swap pour améliorer les performances
 echo "=== Configuration du swap ==="
 fallocate -l 4G /swapfile
