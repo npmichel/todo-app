@@ -23,7 +23,12 @@ pipeline {
         
         stage('Run Tests') {
             steps {
-                sh 'npm test'
+                // Démarrer les services Docker Compose en arrière-plan
+                sh 'docker-compose up -d'
+                // Exécuter les tests dans le conteneur app
+                sh 'docker-compose exec -T app npm test'
+                // Arrêter et supprimer les conteneurs après les tests
+                sh 'docker-compose down'
             }
         }
         

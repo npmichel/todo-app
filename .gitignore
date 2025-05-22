@@ -26,5 +26,29 @@ logs/
 .DS_Store
 
 
+# Fichiers générés par Vagrant
+.vagrant/
+
+# Dossiers de dépendances Node.js
+node_modules/
+
+# Fichiers de logs
+*.log
+logs/
+
+# Fichiers temporaires et backups
+*.tmp
+*.backup
+
+# Fichiers locaux spécifiques (clés SSH, configs, etc.)
+id_rsa
+id_rsa.pub
+
+# Volume Docker ou fichiers générés par Docker Compose
+postgres_data/
+
+# Fichiers spécifiques à l’environnement local
+.env
+
 
 scripts/deploy-kubernetes.sh
